@@ -17,7 +17,10 @@ CREATE TABLE articles (
   title VARCHAR(50) NOT NULL,
   content VARCHAR(100) NOT NULL,
   userId INTEGER NOT NULL,
+  -- userId 컬럼은 외래키로 지정할 거야.
+  -- 외래키로 지정시 반드시 필수적으로 따라붙는 옵션
   FOREIGN KEY (userId) 
+    -- usrId 외래키는 users 테이블의 id 컬럼을 참조한다.
     REFERENCES users(id)
 );
 
@@ -39,5 +42,26 @@ VALUES
 
 
 -- INNER JOIN
+SELECT * FROM articles
+INNER JOIN users
+  ON users.id = articles.userId;
+
+-- 하석주가 작성한 게시글 모두 조회
+SELECT * FROM articles
+INNER JOIN users
+  ON users.id = articles.userId
+WHERE users.name = '하석주';
 
 -- LEFT JOIN
+-- 왼쪽 테이블의 모든 레코드와 ON 에 일치하는 오른쪽 테이블
+SELECT * FROM articles
+LEFT JOIN users
+  ON users.id = articles.userId;
+
+SELECT * FROM users
+LEFT JOIN articles
+  ON users.id = articles.userId;
+
+SELECT * FROM articles
+RIGHT JOIN users
+  ON users.id = articles.userId;
