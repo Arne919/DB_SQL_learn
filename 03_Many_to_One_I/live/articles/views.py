@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+
 from .models import Article, Comment
 from .forms import ArticleForm, CommentForm
 
 
+# Create your views here.
 def index(request):
     articles = Article.objects.all()
     context = {
@@ -15,6 +17,7 @@ def index(request):
 def detail(request, pk):
     article = Article.objects.get(pk=pk)
     comment_form = CommentForm()
+    # 해당게시글에 작성된 모든 댓글 조회 (역참조)
     comments = article.comment_set.all()
     context = {
         'article': article,
@@ -40,13 +43,6 @@ def create(request):
 
 
 @login_required
-def delete(request, pk):
-    article = Article.objects.get(pk=pk)
-    article.delete()
-    return redirect('articles:index')
-
-
-@login_required
 def update(request, pk):
     article = Article.objects.get(pk=pk)
     if request.method == 'POST':
@@ -63,7 +59,14 @@ def update(request, pk):
     return render(request, 'articles/update.html', context)
 
 
+@login_required
+def delete(request, pk):
+    article = Article.objects.get(pk=pk)
+    article.delete()
+    return redirect('articles:index')
+
 def comments_create(request, pk):
+    # 어떤 게시글에 작성되는지 게시글을 조회
     article = Article.objects.get(pk=pk)
     comment_form = CommentForm(request.POST)
     if comment_form.is_valid():
@@ -77,8 +80,9 @@ def comments_create(request, pk):
     }
     return render(request, 'articles/detail.html', context)
 
-
 def comments_delete(request, article_pk, comment_pk):
+    # 어떤 댓글을 삭제할지 조회
     comment = Comment.objects.get(pk=comment_pk)
+    # article = Article.objects.get(pk=article_pk)
     comment.delete()
     return redirect('articles:detail', article_pk)

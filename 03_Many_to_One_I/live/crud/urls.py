@@ -19,7 +19,7 @@ from django.urls import path, include
 from accounts import views
 
 urlpatterns = [
-    path("admin/", admin.site.urls),
+    path('admin/', admin.site.urls),
     path('articles/', include('articles.urls')),
     path('accounts/', include('accounts.urls')),
     path('<int:user_pk>/password/', views.change_password, name='change_password'),
