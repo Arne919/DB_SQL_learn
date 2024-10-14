@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <!-- articles/index.html -->
+  <h1>Articles</h1>
+  {% if request.user.is_authenticated %}
+    <h3>Hello, {{ user.username }}</h3>
+    <a href="{% url 'articles:create' %}">NEW</a>
+    <form action="{% url 'accounts:logout' %}" method="POST">
+      {% csrf_token %}
+      <input type="submit" value="Logout">
+    </form>  
+    <form action="{% url 'accounts:delete' %}" method="POST">
+      {% csrf_token %}
+      <input type="submit" value="회원탈퇴">
+    </form>  
+    <a href="{% url 'accounts:update' %}">회원정보 수정</a>
+  {% else %}
+    <a href="{% url 'accounts:login' %}">Login</a>
+    <a href="{% url 'accounts:signup' %}">Signup</a>
+  {% endif %}
+  <hr>
+
+  {% for article in articles %}
+    <p>작성자 : {{ article.user }}</p>
+    <p>글 번호: {{ article.pk }}</p>
+    <a href="{% url 'articles:detail' article.pk %}">
+      <p>글 제목: {{ article.title }}</p>
+    </a>
+    <p>글 내용: {{ article.content }}</p>
+    {% comment %} 
+      이미 좋아요 상태면, 좋아요 취소 글자가 보여야한다
+      아직 좋아요를 안했다면, 좋아요 글자가 보여야한다.
+      본인이 작성자면 둘다 안보여야 한다. 
+      == 본인이 작성자가 아닐때만 보여야한다.
+       +  로그인 되어 있을때만 보여야 한다.
+    {% endcomment %}
+    {% if article.user != request.user and request.user.is_authenticated %}
+      {% comment %} 
+        좋아요 -> M:N 관계를 형성하거나 제거하거나
+        게시글과 유저간의 관계가 추가(CREATE)되거나 제거 (DELETE) 되거나
+        -> DB에 변동사항을 주는 요청 -> GET 과 `POST` 중에 POST요청이어야한다.
+        -> HTML에서 POST 요청을 보낼수 있는 유일한 방법은 -> form tag
+      {% endcomment %}
+      <form action="{% url "articles:likes" article.pk %}" method="POST">
+        {% csrf_token %}
+        {% comment %} 
+          아래 2개는 같은 역할 -> 정확히 무슨역할 JS Event 수업에서 다룸.
+        {% endcomment %}
+        {% comment %} <input type="submit" value="좋아요"> {% endcomment %}
+        {% comment %} 
+          `좋아요` 글자가 보이는 상황 
+            -> 내가, 이 게시글이 참조하고있는 like_users에 없을때 
+          '좋아요 취소' 위의 반대.
+        {% endcomment %}
+        {% if request.user in article.like_users.all %}
+          <!-- 
+            나는 이미 이 게시글을 좋아요를 누른상태니까, 
+            다시 요청보낸다? 좋아요를 취소하곘다는 의미가 된다.
+          -->
+          <button>좋아요 취소</button>
+        {% else %}
+          <button>좋아요</button>
+        {% endif %}
+      </form>
+      
+    {% endif %}
+    <hr>
+  {% endfor %}
+
+</body>
+</html>
